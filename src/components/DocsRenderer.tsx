@@ -10,21 +10,25 @@ export function DocsRenderer({ content }: DocsRendererProps) {
       case 'heading':
         const HeadingTag = `h${section.level}` as keyof JSX.IntrinsicElements;
         return (
-          <HeadingTag key={index} className={getHeadingClasses(section.level)}>
+          <HeadingTag 
+            key={index} 
+            id={section.id} 
+            className={getHeadingClasses(section.level)}
+          >
             {section.content as string}
           </HeadingTag>
         );
       
       case 'paragraph':
         return (
-          <p key={index} className="mb-4">
+          <p key={index} id={section.id} className="mb-4">
             {section.content as string}
           </p>
         );
       
       case 'list':
         return (
-          <ul key={index} className="list-disc list-inside mb-6 space-y-1">
+          <ul key={index} id={section.id} className="list-disc list-inside mb-6 space-y-1">
             {(section.content as string[]).map((item, itemIndex) => (
               <li key={itemIndex}>{item}</li>
             ))}
@@ -33,7 +37,7 @@ export function DocsRenderer({ content }: DocsRendererProps) {
       
       case 'code':
         return (
-          <pre key={index} className="bg-docs-code-bg rounded-lg p-4 mb-6 overflow-x-auto">
+          <pre key={index} id={section.id} className="bg-docs-code-bg rounded-lg p-4 mb-6 overflow-x-auto">
             <code className="text-sm">{section.content as string}</code>
           </pre>
         );
@@ -41,7 +45,7 @@ export function DocsRenderer({ content }: DocsRendererProps) {
       case 'table':
         const tableData = section.content as TableData;
         return (
-          <div key={index} className="overflow-x-auto my-6">
+          <div key={index} id={section.id} className="overflow-x-auto my-6">
             <table className="w-full border-collapse border border-docs-border-subtle">
               <thead>
                 <tr className="bg-muted">
@@ -82,7 +86,7 @@ export function DocsRenderer({ content }: DocsRendererProps) {
       case 'callout':
         const calloutData = section.content as CalloutData;
         return (
-          <div key={index} className={getCalloutClasses(calloutData.type)}>
+          <div key={index} id={section.id} className={getCalloutClasses(calloutData.type)}>
             <h4 className="font-semibold mb-2">{calloutData.title}</h4>
             <p className="mb-0">{calloutData.content}</p>
           </div>

@@ -7,7 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { dispatchToPolaris, usePolarisProvider, usePolarisContext, usePolarisAction } from "@contentstack/polaris-core";
+import {
+  dispatchToPolaris,
+  usePolarisProvider,
+  usePolarisContext,
+  usePolarisAction,
+  PolarisContextPayload,
+} from "@contentstack/polaris-core";
 import { useState, useEffect } from "react";
 import { useDocsContent } from "@/hooks/use-docs-content";
 interface DocsLayoutProps {
@@ -34,88 +40,97 @@ export function DocsLayout({ children }: DocsLayoutProps) {
       id: 1,
       author: "Sarah Chen",
       avatar: "SC",
-      content: "This documentation is really helpful! The examples are clear and easy to follow. Thanks for the detailed explanations on the API endpoints.",
+      content:
+        "This documentation is really helpful! The examples are clear and easy to follow. Thanks for the detailed explanations on the API endpoints.",
       timestamp: "2 hours ago",
-      isHelpful: true
+      isHelpful: true,
     },
     {
       id: 2,
       author: "Mike Rodriguez",
       avatar: "MR",
-      content: "I was struggling with the installation process, but this guide made it super straightforward. The troubleshooting section saved me a lot of time!",
+      content:
+        "I was struggling with the installation process, but this guide made it super straightforward. The troubleshooting section saved me a lot of time!",
       timestamp: "1 day ago",
-      isHelpful: true
-    }
+      isHelpful: true,
+    },
   ]);
 
   // Setup Polaris context with dynamic content
   usePolarisContext({
-    module: 'docs:introduction',
+    module: "docs:introduction",
     data: content,
   });
 
+
   usePolarisAction("docs:introduction", async (artifact) => {
-    console.log("Received Polaris action:", artifact);
-    console.log("Artifact data:", artifact?.data);
-    
     if (artifact && artifact.type === "update" && artifact.data) {
       const { scroll, ScrollTo, comment } = artifact.data;
       const scrollTarget = scroll || ScrollTo;
-      
+
       // Handle scroll functionality with enhanced timing and fallbacks
       if (scrollTarget) {
         console.log(`Attempting to scroll to: "${scrollTarget}"`);
-        
+
         const performScroll = () => {
           // Special case: scroll to bottom
           if (scrollTarget === "bottom") {
-            window.scrollTo({ 
-              top: document.body.scrollHeight, 
-              behavior: 'smooth' 
+            window.scrollTo({
+              top: document.body.scrollHeight,
+              behavior: "smooth",
             });
             return true;
           }
-          
+
           // Find the section element by ID
           const sectionElement = document.getElementById(scrollTarget);
           if (sectionElement) {
-            console.log(`Found element with ID "${scrollTarget}", scrolling...`);
-            
+            console.log(
+              `Found element with ID "${scrollTarget}", scrolling...`
+            );
+
             // Add a small offset to account for sticky headers
             const elementTop = sectionElement.offsetTop;
             const offset = 80; // Adjust based on your header height
-            
+
             window.scrollTo({
               top: elementTop - offset,
-              behavior: 'smooth'
+              behavior: "smooth",
             });
-            
+
             // Alternative method if the above doesn't work
             setTimeout(() => {
-              sectionElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start' 
+              sectionElement.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
               });
             }, 100);
-            
+
             return true;
           }
           return false;
         };
-        
+
         // Try immediate scroll
         if (!performScroll()) {
-          console.warn(`Section with ID "${scrollTarget}" not found, retrying...`);
-          
+          console.warn(
+            `Section with ID "${scrollTarget}" not found, retrying...`
+          );
+
           // Retry after DOM updates
           setTimeout(() => {
             if (!performScroll()) {
-              console.warn(`Section with ID "${scrollTarget}" still not found after retry`);
-              
+              console.warn(
+                `Section with ID "${scrollTarget}" still not found after retry`
+              );
+
               // Final debug: List all elements with IDs
-              const elementsWithIds = document.querySelectorAll('[id]');
-              console.log('Available IDs on page:', Array.from(elementsWithIds).map(el => el.id));
-              
+              const elementsWithIds = document.querySelectorAll("[id]");
+              console.log(
+                "Available IDs on page:",
+                Array.from(elementsWithIds).map((el) => el.id)
+              );
+
               // Try one more time with a longer delay
               setTimeout(() => {
                 performScroll();
@@ -124,7 +139,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
           }, 200);
         }
       }
-      
+
       // Handle comment functionality
       if (comment) {
         // Add the comment to the comments list
@@ -134,44 +149,44 @@ export function DocsLayout({ children }: DocsLayoutProps) {
           avatar: "AI",
           content: comment,
           timestamp: "Just now",
-          isHelpful: false
+          isHelpful: false,
         };
-        
-        setComments(prevComments => [...prevComments, newComment]);
-        
+
+        setComments((prevComments) => [...prevComments, newComment]);
+
         // Scroll to comments section after a brief delay to allow state update
         setTimeout(() => {
-          const commentsSection = document.getElementById('comments-section');
+          const commentsSection = document.getElementById("comments-section");
           if (commentsSection) {
-            commentsSection.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'start' 
+            commentsSection.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
             });
           }
         }, 100);
       }
     }
-    
+
     setDocsResponse(artifact);
     return { success: true };
-  })
+  });
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;
-    
+
     const comment: Comment = {
       id: comments.length + 1,
       author: "Anonymous User",
       avatar: "AU",
       content: newComment.trim(),
       timestamp: "Just now",
-      isHelpful: false
+      isHelpful: false,
     };
-    
+
     setComments([...comments, comment]);
     setNewComment("");
   };
-  
+
   const openSidebar = () => {
     dispatchToPolaris(provider, "OPEN_SIDEBAR", {
       open: true,
@@ -185,7 +200,9 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 
     // Simple and accurate Polaris sidebar detection
     const checkPolarisState = () => {
-      const sidebarHeader = document.querySelector('[data-testid="sidebar-header"]');
+      const sidebarHeader = document.querySelector(
+        '[data-testid="sidebar-header"]'
+      );
       const isOpen = sidebarHeader !== null;
       setIsPolarisOpen(isOpen);
     };
@@ -200,18 +217,18 @@ export function DocsLayout({ children }: DocsLayoutProps) {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['data-testid']
+      attributeFilter: ["data-testid"],
     });
 
     // Initial check
     checkPolarisState();
-    
+
     // Also listen for resize events in case sidebar affects layout
-    window.addEventListener('resize', checkPolarisState);
-    
+    window.addEventListener("resize", checkPolarisState);
+
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', checkPolarisState);
+      window.removeEventListener("resize", checkPolarisState);
     };
   }, [provider]);
 
@@ -219,14 +236,14 @@ export function DocsLayout({ children }: DocsLayoutProps) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background relative">
         <AppSidebar />
-        
-        <div 
+
+        <div
           className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-            isPolarisOpen ? 'lg:mr-80 md:mr-72 mr-0' : 'mr-0'
+            isPolarisOpen ? "lg:mr-80 md:mr-72 mr-0" : "mr-0"
           }`}
           style={{
             // Ensure our content doesn't get hidden behind the Polaris sidebar
-            zIndex: isPolarisOpen ? 1 : 'auto'
+            zIndex: isPolarisOpen ? 1 : "auto",
           }}
         >
           {/* Header */}
@@ -235,16 +252,16 @@ export function DocsLayout({ children }: DocsLayoutProps) {
               <SidebarTrigger className="mr-4">
                 <Menu className="w-4 h-4" />
               </SidebarTrigger>
-              
+
               <div className="flex-1 flex items-center space-x-4">
                 <div className="relative flex-1 max-w-md">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search documentation..." 
+                  <Input
+                    placeholder="Search documentation..."
                     className="pl-10 bg-muted/50 border-docs-border-subtle"
                   />
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   <Button variant="outline" size="sm" onClick={openSidebar}>
                     Ask AI
@@ -281,7 +298,10 @@ export function DocsLayout({ children }: DocsLayoutProps) {
                   {/* Existing Comments */}
                   <div className="space-y-4">
                     {comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-3 p-4 rounded-lg bg-background border border-docs-border-subtle">
+                      <div
+                        key={comment.id}
+                        className="flex gap-3 p-4 rounded-lg bg-background border border-docs-border-subtle"
+                      >
                         <Avatar className="w-10 h-10">
                           <AvatarFallback className="bg-primary/10 text-primary font-medium">
                             {comment.avatar}
@@ -289,8 +309,12 @@ export function DocsLayout({ children }: DocsLayoutProps) {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-medium text-sm">{comment.author}</h4>
-                            <span className="text-xs text-muted-foreground">{comment.timestamp}</span>
+                            <h4 className="font-medium text-sm">
+                              {comment.author}
+                            </h4>
+                            <span className="text-xs text-muted-foreground">
+                              {comment.timestamp}
+                            </span>
                             {comment.isHelpful && (
                               <Badge variant="secondary" className="text-xs">
                                 Helpful
@@ -319,7 +343,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
                         className="min-h-[100px] resize-none"
                       />
                       <div className="flex justify-end">
-                        <Button 
+                        <Button
                           onClick={handleSubmitComment}
                           disabled={!newComment.trim()}
                           className="flex items-center gap-2"

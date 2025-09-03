@@ -13,6 +13,7 @@ import Database from "./pages/docs/Database";
 import NotFound from "./pages/NotFound";
 import {PolarisProvider, Sidebar} from "@contentstack/polaris-core";
 import "@contentstack/polaris-core/styles";
+import { templates } from "./data/templates";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -21,7 +22,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <PolarisProvider>
-        <Sidebar templates={[]} />
+        <Sidebar templates={templates} />
       <BrowserRouter>
         <DocsLayout>
           <Routes>

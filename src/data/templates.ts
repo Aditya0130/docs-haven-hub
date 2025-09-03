@@ -1,4 +1,4 @@
-export const templates = [
+export const templates =[
     {
       "title": "Explain This Section",
       "description": "Break down complex technical concepts from this documentation section into simple, easy-to-understand terms",
@@ -14,7 +14,7 @@ export const templates = [
     {
       "title": "Quick Summary",
       "description": "Provide a concise overview of the key points and main takeaways from this page",
-      "category": "Overview",
+      "category": "Understanding",
       "isFeatured": true
     },
     {
@@ -32,7 +32,7 @@ export const templates = [
     {
       "title": "Compare Alternatives",
       "description": "Compare the approaches shown in this documentation with alternative methods or competing solutions",
-      "category": "Analysis"
+      "category": "Understanding"
     },
     {
       "title": "Best Practices",
@@ -42,41 +42,41 @@ export const templates = [
     {
       "title": "Step-by-Step Guide",
       "description": "Create a detailed, sequential walkthrough for implementing the features described in this documentation",
-      "category": "Tutorial"
+      "category": "Implementation"
     },
     {
       "title": "Security Considerations",
       "description": "Identify potential security implications and recommended safeguards for the implementation described here",
-      "category": "Security"
+      "category": "Implementation"
     },
     {
       "title": "Performance Tips",
       "description": "Suggest ways to optimize performance when using the methods or features outlined in this documentation",
-      "category": "Optimization"
+      "category": "Implementation"
     },
     {
       "title": "Migration Guide",
       "description": "Help me understand how to migrate from older versions or different approaches to what's described here",
-      "category": "Migration"
+      "category": "Support"
     },
     {
       "title": "Testing Strategy",
       "description": "Recommend testing approaches and provide test examples for the functionality covered in this documentation",
-      "category": "Testing"
+      "category": "Implementation"
     },
     {
       "title": "Related Resources",
       "description": "Find and suggest related documentation, tutorials, or external resources that complement this page",
-      "category": "Resources"
+      "category": "Understanding"
     },
     {
       "title": "Prerequisites Check",
       "description": "List the requirements, dependencies, and prior knowledge needed to successfully implement what's described here",
-      "category": "Setup"
+      "category": "Support"
     },
     {
       "title": "Custom Implementation",
       "description": "Help me adapt the documentation examples to my specific project requirements and constraints",
-      "category": "Customization"
+      "category": "Implementation"
     }
   ]

@@ -3,12 +3,16 @@ import { AppSidebar } from "./AppSidebar";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
+import { dispatchToPolaris, usePolarisProvider } from "@contentstack/polaris-core";
 interface DocsLayoutProps {
   children: React.ReactNode;
 }
 
 export function DocsLayout({ children }: DocsLayoutProps) {
+  const  provider  = usePolarisProvider();
+  const openSidebar = () => dispatchToPolaris(provider, "OPEN_SIDEBAR", {
+    open: true,
+  });
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -32,8 +36,8 @@ export function DocsLayout({ children }: DocsLayoutProps) {
                 </div>
                 
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm">
-                    GitHub
+                  <Button variant="outline" size="sm" onClick={openSidebar}>
+                    Ask AI
                   </Button>
                 </div>
               </div>

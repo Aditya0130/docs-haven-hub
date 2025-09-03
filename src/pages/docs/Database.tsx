@@ -1,6 +1,8 @@
 import { DocsRenderer } from '@/components/DocsRenderer';
-import { docsContent } from '@/data/docsContent';
+import { useDocsContent } from '@/hooks/use-docs-content';
 
 export default function Database() {
-  return <DocsRenderer content={docsContent.database} />;
+  const content = useDocsContent();
+  
+  return <DocsRenderer content={content} />;
 }

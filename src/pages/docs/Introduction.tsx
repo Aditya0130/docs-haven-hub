@@ -1,10 +1,8 @@
 import { DocsRenderer } from '@/components/DocsRenderer';
-import { docsContent } from '@/data/docsContent';
-import { usePolarisContext } from '@contentstack/polaris-core';
+import { useDocsContent } from '@/hooks/use-docs-content';
+
 export default function Introduction() {
-  usePolarisContext({
-    module: 'docs:introduction',
-    data:  docsContent.introduction,
-  })
-  return <DocsRenderer content={docsContent.introduction} />;
+  const content = useDocsContent();
+  
+  return <DocsRenderer content={content} />;
 }

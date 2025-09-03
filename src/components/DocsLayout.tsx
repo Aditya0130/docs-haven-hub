@@ -3,8 +3,9 @@ import { AppSidebar } from "./AppSidebar";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { dispatchToPolaris, usePolarisProvider } from "@contentstack/polaris-core";
+import { dispatchToPolaris, usePolarisProvider, usePolarisContext } from "@contentstack/polaris-core";
 import { useState, useEffect } from "react";
+import { useDocsContent } from "@/hooks/use-docs-content";
 interface DocsLayoutProps {
   children: React.ReactNode;
 }
@@ -12,6 +13,13 @@ interface DocsLayoutProps {
 export function DocsLayout({ children }: DocsLayoutProps) {
   const provider = usePolarisProvider();
   const [isPolarisOpen, setIsPolarisOpen] = useState(false);
+  const content = useDocsContent();
+
+  // Setup Polaris context with dynamic content
+  usePolarisContext({
+    module: 'docs:introduction',
+    data: content,
+  });
   
   const openSidebar = () => {
     dispatchToPolaris(provider, "OPEN_SIDEBAR", {

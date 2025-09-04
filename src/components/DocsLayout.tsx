@@ -8,16 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
-  dispatchToPolaris,
   usePolarisProvider,
   usePolarisContext,
-  usePolarisAction,
-  PolarisContextPayload,
 } from "@contentstack/polaris-core";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useDocsContent } from "@/hooks/use-docs-content";
 interface DocsLayoutProps {
   children: React.ReactNode;
+  sidebarOpen: boolean;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 interface Comment {
@@ -29,9 +28,8 @@ interface Comment {
   isHelpful?: boolean;
 }
 
-export function DocsLayout({ children }: DocsLayoutProps) {
+export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayoutProps) {
   const provider = usePolarisProvider();
-  const [isPolarisOpen, setIsPolarisOpen] = useState(false);
   const content = useDocsContent();
   const [docsResponse, setDocsResponse] = useState(null);
   const [newComment, setNewComment] = useState("");
@@ -58,118 +56,12 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 
   // Setup Polaris context with dynamic content
   usePolarisContext({
-    module: "docs:introduction",
+    module: "cms:docs",
     data: content,
   });
 
 
-  usePolarisAction("docs:introduction", async (artifact) => {
-    if (artifact && artifact.type === "update" && artifact.data) {
-      const { scroll, ScrollTo, comment } = artifact.data;
-      const scrollTarget = scroll || ScrollTo;
 
-      // Handle scroll functionality with enhanced timing and fallbacks
-      if (scrollTarget) {
-        console.log(`Attempting to scroll to: "${scrollTarget}"`);
-
-        const performScroll = () => {
-          // Special case: scroll to bottom
-          if (scrollTarget === "bottom") {
-            window.scrollTo({
-              top: document.body.scrollHeight,
-              behavior: "smooth",
-            });
-            return true;
-          }
-
-          // Find the section element by ID
-          const sectionElement = document.getElementById(scrollTarget);
-          if (sectionElement) {
-            console.log(
-              `Found element with ID "${scrollTarget}", scrolling...`
-            );
-
-            // Add a small offset to account for sticky headers
-            const elementTop = sectionElement.offsetTop;
-            const offset = 80; // Adjust based on your header height
-
-            window.scrollTo({
-              top: elementTop - offset,
-              behavior: "smooth",
-            });
-
-            // Alternative method if the above doesn't work
-            setTimeout(() => {
-              sectionElement.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
-            }, 100);
-
-            return true;
-          }
-          return false;
-        };
-
-        // Try immediate scroll
-        if (!performScroll()) {
-          console.warn(
-            `Section with ID "${scrollTarget}" not found, retrying...`
-          );
-
-          // Retry after DOM updates
-          setTimeout(() => {
-            if (!performScroll()) {
-              console.warn(
-                `Section with ID "${scrollTarget}" still not found after retry`
-              );
-
-              // Final debug: List all elements with IDs
-              const elementsWithIds = document.querySelectorAll("[id]");
-              console.log(
-                "Available IDs on page:",
-                Array.from(elementsWithIds).map((el) => el.id)
-              );
-
-              // Try one more time with a longer delay
-              setTimeout(() => {
-                performScroll();
-              }, 500);
-            }
-          }, 200);
-        }
-      }
-
-      // Handle comment functionality
-      if (comment) {
-        // Add the comment to the comments list
-        const newComment: Comment = {
-          id: comments.length + 1,
-          author: "AI Assistant",
-          avatar: "AI",
-          content: comment,
-          timestamp: "Just now",
-          isHelpful: false,
-        };
-
-        setComments((prevComments) => [...prevComments, newComment]);
-
-        // Scroll to comments section after a brief delay to allow state update
-        setTimeout(() => {
-          const commentsSection = document.getElementById("comments-section");
-          if (commentsSection) {
-            commentsSection.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
-          }
-        }, 100);
-      }
-    }
-
-    setDocsResponse(artifact);
-    return { success: true };
-  });
 
   const handleSubmitComment = () => {
     if (!newComment.trim()) return;
@@ -188,49 +80,9 @@ export function DocsLayout({ children }: DocsLayoutProps) {
   };
 
   const openSidebar = () => {
-    dispatchToPolaris(provider, "OPEN_SIDEBAR", {
-      open: true,
-    });
-    setIsPolarisOpen(true);
+    setSidebarOpen(true);
   };
 
-  // Listen for Polaris sidebar state changes
-  useEffect(() => {
-    if (!provider) return;
-
-    // Simple and accurate Polaris sidebar detection
-    const checkPolarisState = () => {
-      const sidebarHeader = document.querySelector(
-        '[data-testid="sidebar-header"]'
-      );
-      const isOpen = sidebarHeader !== null;
-      setIsPolarisOpen(isOpen);
-    };
-
-    // Use MutationObserver to detect DOM changes
-    const observer = new MutationObserver(() => {
-      // Debounce the check to avoid excessive calls
-      setTimeout(checkPolarisState, 100);
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["data-testid"],
-    });
-
-    // Initial check
-    checkPolarisState();
-
-    // Also listen for resize events in case sidebar affects layout
-    window.addEventListener("resize", checkPolarisState);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", checkPolarisState);
-    };
-  }, [provider]);
 
   return (
     <SidebarProvider>
@@ -239,11 +91,11 @@ export function DocsLayout({ children }: DocsLayoutProps) {
 
         <div
           className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-            isPolarisOpen ? "lg:mr-80 md:mr-72 mr-0" : "mr-0"
+            sidebarOpen ? "lg:mr-80 md:mr-72 mr-0" : "mr-0"
           }`}
           style={{
             // Ensure our content doesn't get hidden behind the Polaris sidebar
-            zIndex: isPolarisOpen ? 1 : "auto",
+            zIndex: sidebarOpen ? 1 : "auto",
           }}
         >
           {/* Header */}
@@ -266,12 +118,7 @@ export function DocsLayout({ children }: DocsLayoutProps) {
                   <Button variant="outline" size="sm" onClick={openSidebar}>
                     Ask AI
                   </Button>
-                  {/* Debug indicator - remove in production */}
-                  {isPolarisOpen && (
-                    <div className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      Sidebar Open
-                    </div>
-                  )}
+                 
                 </div>
               </div>
             </div>

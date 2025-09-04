@@ -14,18 +14,31 @@ import NotFound from "./pages/NotFound";
 import { PolarisProvider, PolarisSidebar } from "@contentstack/polaris-core";
 import "@contentstack/polaris-core/styles";
 import { templates } from "./data/templates";
+import { useState } from "react";
+
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <PolarisProvider>
-        <PolarisSidebar templates={templates} />
-        <BrowserRouter>
-          <DocsLayout>
-            <Routes>
+const App = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <PolarisProvider>
+          <PolarisSidebar 
+            isOpen={sidebarOpen} 
+            onClose={() => setSidebarOpen(false)} 
+            templates={templates} 
+            moduleName="cms:docs" 
+          />
+          <BrowserRouter>
+            <DocsLayout 
+              sidebarOpen={sidebarOpen}
+              setSidebarOpen={setSidebarOpen}
+            >
+              <Routes>
               <Route path="/" element={<Introduction />} />
               <Route path="/quick-start" element={<QuickStart />} />
               <Route path="/installation" element={<Installation />} />
@@ -88,12 +101,13 @@ const App = () => (
                 }
               />
               <Route path="*" element={<NotFound />} />
-            </Routes>
-          </DocsLayout>
-        </BrowserRouter>
-      </PolarisProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+              </Routes>
+            </DocsLayout>
+          </BrowserRouter>
+        </PolarisProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

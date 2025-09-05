@@ -10,9 +10,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   usePolarisProvider,
   usePolarisContext,
+  validateActionName,
+  usePolarisAction,
 } from "@contentstack/polaris-core";
 import { useState } from "react";
 import { useDocsContent } from "@/hooks/use-docs-content";
+import { useNavigate } from "react-router-dom";
 interface DocsLayoutProps {
   children: React.ReactNode;
   sidebarOpen: boolean;
@@ -31,6 +34,7 @@ interface Comment {
 export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayoutProps) {
   const provider = usePolarisProvider();
   const content = useDocsContent();
+  const navigate = useNavigate();
   const [docsResponse, setDocsResponse] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState<Comment[]>([
@@ -60,7 +64,242 @@ export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayout
     data: content,
   });
 
+  // Handle navigation actions from Polaris
+  usePolarisAction("app:navigate", async (artifact) => {
+    console.log("Navigation action received:", artifact);
+    
+    try {
+      if (!artifact?.data?.navigate) {
+        return {
+          success: false,
+          error: "No navigation destination provided",
+        };
+      }
 
+      const destination = artifact.data.navigate;
+      let route = "/";
+      
+      // Map navigation destinations to routes
+      switch (destination.toLowerCase()) {
+        case "introduction":
+          route = "/";
+          break;
+        case "quickstart":
+        case "quick-start":
+          route = "/quick-start";
+          break;
+        case "installation":
+          route = "/installation";
+          break;
+        case "apireference":
+        case "api-reference":
+        case "api":
+          route = "/api";
+          break;
+        case "components":
+          route = "/components";
+          break;
+        case "database":
+          route = "/database";
+          break;
+        case "auth":
+        case "authentication":
+          route = "/auth";
+          break;
+        case "performance":
+          route = "/performance";
+          break;
+        case "deployment":
+          route = "/deployment";
+          break;
+        case "team":
+          route = "/team";
+          break;
+        case "analytics":
+          route = "/analytics";
+          break;
+        case "community":
+          route = "/community";
+          break;
+        default:
+          // If no match, try using the destination as-is with leading slash
+          route = destination.startsWith("/") ? destination : `/${destination.toLowerCase()}`;
+      }
+      
+      navigate(route);
+      
+      return {
+        success: true,
+        message: `Navigated to ${route}`,
+      };
+    } catch (error) {
+      console.error("Error handling navigation action:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  });
+
+  // Handle scroll actions from Polaris
+  usePolarisAction("app:scroll-to", async (artifact) => {
+    console.log("Scroll action received:", artifact);
+    
+    try {
+      if (!artifact?.data?.scroll) {
+        return {
+          success: false,
+          error: "No scroll target provided",
+        };
+      }
+
+      const scrollTarget = artifact.data.scroll;
+      
+      if (scrollTarget === "bottom") {
+        // Scroll to bottom of the page - use multiple methods to ensure we get the absolute bottom
+        const scrollToBottom = () => {
+          const documentHeight = Math.max(
+            document.body.scrollHeight,
+            document.body.offsetHeight,
+            document.documentElement.clientHeight,
+            document.documentElement.scrollHeight,
+            document.documentElement.offsetHeight
+          );
+          
+          window.scrollTo({
+            top: documentHeight,
+            behavior: "smooth"
+          });
+        };
+        
+        // Add a small delay to account for any dynamic content loading
+        setTimeout(scrollToBottom, 100);
+        
+        return {
+          success: true,
+          message: "Scrolled to bottom of page",
+        };
+      }
+
+      // Function to find element by exact ID or partial match
+      const findScrollElement = (targetId: string) => {
+        // First try exact match
+        let element = document.getElementById(targetId);
+        if (element) {
+          console.log(`Found element by exact ID: ${targetId}`);
+          return element;
+        }
+
+        // If not found, try to find by partial match or related IDs
+        const possibleIds = [
+          targetId,
+          `${targetId}-desc`,
+          `${targetId}-table`,
+          `${targetId}-list`,
+          `${targetId}-code`,
+          `${targetId}-example`
+        ];
+
+        for (const id of possibleIds) {
+          element = document.getElementById(id);
+          if (element) {
+            console.log(`Found element by related ID: ${id}`);
+            return element;
+          }
+        }
+
+        // Last resort: search for any element containing the target ID
+        const allElements = document.querySelectorAll('[id]');
+        for (const el of allElements) {
+          if (el.id && el.id.includes(targetId)) {
+            console.log(`Found element by partial match: ${el.id}`);
+            return el as HTMLElement;
+          }
+        }
+
+        return null;
+      };
+
+      const element = findScrollElement(scrollTarget);
+      
+      if (element) {
+        // Add a small delay to ensure DOM is ready
+        setTimeout(() => {
+          element.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+            inline: "nearest"
+          });
+          
+          // Add visual highlight temporarily
+          element.style.transition = "background-color 0.3s ease";
+          const originalBg = element.style.backgroundColor;
+          element.style.backgroundColor = "rgba(59, 130, 246, 0.1)"; // Light blue highlight
+          
+          setTimeout(() => {
+            element.style.backgroundColor = originalBg;
+          }, 2000);
+        }, 100);
+        
+        return {
+          success: true,
+          message: `Scrolled to element with ID: ${element.id}`,
+        };
+      } else {
+        // Debug: List all available IDs
+        const allIds = Array.from(document.querySelectorAll('[id]')).map(el => el.id);
+        console.warn(`Element with ID "${scrollTarget}" not found. Available IDs:`, allIds);
+        
+        return {
+          success: false,
+          error: `Element with ID "${scrollTarget}" not found. Available IDs: ${allIds.join(', ')}`,
+        };
+      }
+    } catch (error) {
+      console.error("Error handling scroll action:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  });
+
+  // Handle content addition actions from Polaris
+  usePolarisAction("content:add", async (artifact) => {
+    console.log("Content add action received:", artifact);
+    
+    try {
+      if (!artifact?.data?.comment) {
+        return {
+          success: false,
+          error: "No comment content provided",
+        };
+      }
+
+      // Handle comment addition
+      const newComment: Comment = {
+        id: comments.length + 1,
+        author: "AI Assistant",
+        avatar: "AI",
+        content: artifact.data.comment,
+        timestamp: "Just now",
+        isHelpful: false,
+      };
+      
+      setComments(prevComments => [...prevComments, newComment]);
+      
+      return {
+        success: true,
+        message: "Comment added successfully",
+      };
+    } catch (error) {
+      console.error("Error handling content add action:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error occurred",
+      };
+    }
+  });
 
 
   const handleSubmitComment = () => {

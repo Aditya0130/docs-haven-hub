@@ -31,7 +31,6 @@ interface Comment {
 }
 
 export function DocsLayout({ children }: DocsLayoutProps) {
-  const provider = usePolarisProvider();
   const content = useDocsContent();
   const navigate = useNavigate();
   const [docsResponse, setDocsResponse] = useState(null);
@@ -61,10 +60,10 @@ export function DocsLayout({ children }: DocsLayoutProps) {
   // Setup Polaris context with dynamic content
   usePolarisContext({
     module: "cms:docs",
-    data: content,
+    data: content, //change to payload
   });
 
-  // Handle navigation actions from Polaris
+  // Handle navigation actions from Polaris -- remove this
   usePolarisAction("app:navigate", async (artifact) => {
     console.log("Navigation action received:", artifact);
     
@@ -447,3 +446,4 @@ export function DocsLayout({ children }: DocsLayoutProps) {
     </SidebarProvider>
   );
 }
+  

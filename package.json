@@ -11,7 +11,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@contentstack/polaris-core": "file:../polaris-core/contentstack-polaris-core-1.0.0.tgz",
+    "@contentstack/polaris-core": "github:atharv0826/polaris-core",
+    "@contentstack/venus-components": "^1.9.33",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

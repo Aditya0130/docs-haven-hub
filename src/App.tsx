@@ -14,12 +14,9 @@ import NotFound from "./pages/NotFound";
 import { PolarisProvider, PolarisSidebar } from "@contentstack/polaris-core";
 import "@contentstack/polaris-core/styles";
 import { templates } from "./data/templates";
-import { useState } from "react";
-
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -27,17 +24,13 @@ const App = () => {
         <Toaster />
         <Sonner />
         <PolarisProvider>
-          <PolarisSidebar 
-            isOpen={sidebarOpen} 
-            onClose={() => setSidebarOpen(false)} 
+          <PolarisSidebar
             templates={templates} 
-            moduleName="cms:docs" 
+            moduleName="cms:docs"
+            initialWidth={600}
           />
           <BrowserRouter>
-            <DocsLayout 
-              sidebarOpen={sidebarOpen}
-              setSidebarOpen={setSidebarOpen}
-            >
+            <DocsLayout>
               <Routes>
               <Route path="/" element={<Introduction />} />
               <Route path="/quick-start" element={<QuickStart />} />

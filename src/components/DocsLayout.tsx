@@ -10,16 +10,15 @@ import { Badge } from "@/components/ui/badge";
 import {
   usePolarisProvider,
   usePolarisContext,
-  validateActionName,
+  usePolarisSidebar,
   usePolarisAction,
 } from "@contentstack/polaris-core";
 import { useState } from "react";
 import { useDocsContent } from "@/hooks/use-docs-content";
 import { useNavigate } from "react-router-dom";
+import { templates } from "@/data/templates";
 interface DocsLayoutProps {
   children: React.ReactNode;
-  sidebarOpen: boolean;
-  setSidebarOpen: (open: boolean) => void;
 }
 
 interface Comment {
@@ -31,12 +30,13 @@ interface Comment {
   isHelpful?: boolean;
 }
 
-export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayoutProps) {
+export function DocsLayout({ children }: DocsLayoutProps) {
   const provider = usePolarisProvider();
   const content = useDocsContent();
   const navigate = useNavigate();
   const [docsResponse, setDocsResponse] = useState(null);
   const [newComment, setNewComment] = useState("");
+  const polarisSidebar = usePolarisSidebar();
   const [comments, setComments] = useState<Comment[]>([
     {
       id: 1,
@@ -318,9 +318,7 @@ export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayout
     setNewComment("");
   };
 
-  const openSidebar = () => {
-    setSidebarOpen(true);
-  };
+  
 
 
   return (
@@ -330,11 +328,11 @@ export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayout
 
         <div
           className={`flex-1 flex flex-col transition-all duration-300 ease-in-out ${
-            sidebarOpen ? "lg:mr-80 md:mr-72 mr-0" : "mr-0"
+            polarisSidebar.isOpen ? "lg:mr-80 md:mr-72 mr-0" : "mr-0"
           }`}
           style={{
             // Ensure our content doesn't get hidden behind the Polaris sidebar
-            zIndex: sidebarOpen ? 1 : "auto",
+            zIndex: polarisSidebar.isOpen ? 1 : "auto",
           }}
         >
           {/* Header */}
@@ -354,7 +352,7 @@ export function DocsLayout({ children, sidebarOpen, setSidebarOpen }: DocsLayout
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={openSidebar}>
+                  <Button variant="outline" size="sm" onClick={polarisSidebar.open}>
                     Ask AI
                   </Button>
                  

@@ -11,7 +11,8 @@ import ApiReference from "./pages/docs/ApiReference";
 import Components from "./pages/docs/Components";
 import Database from "./pages/docs/Database";
 import NotFound from "./pages/NotFound";
-import { PolarisProvider } from "@contentstack/polaris-core";
+import { PolarisProvider, PolarisSidebar } from "@contentstack/polaris-core";
+import '@contentstack/polaris-core/dist/styles.css';
 import { templates } from "./data/templates";
 import { ThemeProvider } from "./contexts/ThemeContext";
 const queryClient = new QueryClient();
@@ -20,6 +21,10 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <PolarisProvider>
+        <PolarisSidebar 
+          templates={templates}
+          moduleName="cms:docs"
+        />
         <ThemeProvider>
           <TooltipProvider>
             <Toaster />
